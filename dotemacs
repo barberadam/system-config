@@ -97,14 +97,21 @@
 ;; MATLAB ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Add matlab-emacs mode
 (add-to-list 'load-path "~/src/matlab-emacs/") 
-;(load-library "matlab-load")
+(load-library "matlab-load")
 (autoload 'matlab-mode "matlab" "Matlab Editing Mode" t)
 (add-to-list
  'auto-mode-alist
  '("\\.m$" . matlab-mode))
 (setq matlab-indent-function t)
 (setq matlab-shell-command "matlab")
-(setq matlab-shell-command-switches '("-nodesktop"))
+;; (setq matlab-shell-command-switches '("-nodesktop"))
+;; (eval-after-load "matlab-mode-hook"
+(add-hook 'matlab-mode-hook
+	  (lambda ()
+	    (define-key matlab-mode-map (kbd "M-;") nil)))
+(add-hook 'matlab-mode-hook 'auto-complete-mode)
+(custom-set-variables
+ '(matlab-shell-command-switches '("-nodesktop -nosplash")))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; BUFFER MOVE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -135,26 +142,43 @@
 (setq TeX-electric-sub-and-superscript t)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; PYTHON:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-;; Add python-mode.
-(add-to-list 'load-path "~/.emacs.d/python-mode.el-6.1.1/")
-(add-to-list 'load-path "~/.emacs.d/python-mode.el-6.1.1/completion/")
-(add-to-list 'load-path "~/.emacs.d/python-mode.el-6.1.1/extensions/")
-(setq py-install-directory "~/.emacs.d/python-mode.el-6.1.1/")
-(autoload 'python-mode "python" "Python Editing Mode" t)
-(add-to-list
- 'auto-mode-alist
- '("\\.py$" . python-mode))
-(require 'python-mode)
-(require 'highlight-indentation)
-(require 'column-marker)
-;; make python mode recognize '_' as a word separator
-;; (modify-syntax-entry ?_ "_" python-mode-syntax-table)
-(modify-syntax-entry ?_ "_" python-mode-syntax-table)
-(add-hook 'python-mode-hook 'highlight-indentation)
-;;enable cython-mode
-;;(require 'cython-mode)
+;; PYTHON ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; jedi configurations:
+(add-hook 'python-mode-hook 'jedi:setup)
+(add-hook 'jedi-mode-hook 'jedi-direx:setup)
+(setq jedi:complete-on-dot t)
+;; make python mode recognize _ as a word separator
+(add-hook 'python-mode-hook (function
+			     (lambda () (modify-syntax-entry ?_ "_" python-mode-syntax-table))))
+;; set docstring formatting options
+(add-hook 'python-mode-hook (function
+			     (lambda () (setq py-docstring-style 'django))))
+(add-hook 'python-mode-hook (function
+			     (lambda () (local-set-key (kbd "RET") 'newline-and-indent))))
+(add-hook 'python-mode-hook (function
+			     (lambda () (local-set-key (kbd "C-c #") 'comment-region))))
+(add-hook 'python-mode-hook 'highlight-indentation-mode)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;; PYTHON:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;; ;; Add python-mode.
+;; (add-to-list 'load-path "~/.emacs.d/python-mode.el-6.1.1/")
+;; (add-to-list 'load-path "~/.emacs.d/python-mode.el-6.1.1/completion/")
+;; (add-to-list 'load-path "~/.emacs.d/python-mode.el-6.1.1/extensions/")
+;; (setq py-install-directory "~/.emacs.d/python-mode.el-6.1.1/")
+;; (autoload 'python-mode "python" "Python Editing Mode" t)
+;; (add-to-list
+;;  'auto-mode-alist
+;;  '("\\.py$" . python-mode))
+;; (require 'python-mode)
+;; (require 'highlight-indentation)
+;; (require 'column-marker)
+;; ;; make python mode recognize '_' as a word separator
+;; ;; (modify-syntax-entry ?_ "_" python-mode-syntax-table)
+;; (modify-syntax-entry ?_ "_" python-mode-syntax-table)
+;; (add-hook 'python-mode-hook 'highlight-indentation)
+;; ;;enable cython-mode
+;; ;;(require 'cython-mode)
+;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;; FLYSPELL ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -177,5 +201,15 @@
 (define-key global-map "\C-ca" 'org-agenda)
 (setq org-log-done t)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; ROSEMACS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (require 'rosemacs)
+;; (invoke-rosemacs)
+
+;; (global-set-key "\C-x\C-r" ros-keymap)
+
+(add-to-list 'auto-mode-alist '("\\.launch$" . xml-mode))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (setq line-number-mode t)
 (setq column-number-mode t)
